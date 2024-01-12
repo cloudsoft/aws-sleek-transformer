@@ -11,3 +11,6 @@
 node_modules
 oclif.lock
 oclif.manifest.json
+
+# extracted resources
+/unzipped-*
