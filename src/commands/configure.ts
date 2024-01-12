@@ -166,7 +166,7 @@ export default class Configure extends SleekCommand {
       addon["region"] = flags.region;
     }
 
-    if (flags.marketplaceId !== undefined && this.isAwsAccount(flags.marketplaceId)) {
+    if (flags.marketplaceId !== undefined && this.isValidAwsAccount(flags.marketplaceId)) {
       addon["accId"] = flags.marketplaceId;
     }
 
@@ -184,9 +184,10 @@ export default class Configure extends SleekCommand {
 
         this.updateConfig();
         this.log(`Configured ${flags.addonName}@${flags.addonVersion}`)
+        return
       }
     }
-    this.logToStderr(`Error configuring ${flags.addonName}${flags?.addonVersion?'@'+flags.addonVersion:''}`)
+    this.error(`Error configuring ${flags.addonName}${flags?.addonVersion?'@'+flags.addonVersion:''}`,{exit: 1})
   }
 
   private isValidRegion(region: string): boolean {
@@ -200,7 +201,7 @@ export default class Configure extends SleekCommand {
     return regionRegex.test(region);
   }
 
-  private isAwsAccount(region: string): boolean {
+  private isValidAwsAccount(region: string): boolean {
     // AWS account ID string requires exactly 12 digits
     const regionRegex = /^\d{12}$/;
 
