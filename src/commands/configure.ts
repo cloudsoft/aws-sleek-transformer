@@ -155,15 +155,19 @@ export default class Configure extends SleekCommand {
       return;
     }
 
-    let addon = {
+    const addon = {
       region: "",
-      accId: "",
+      accId: "",// why no marketplaceId as the flag?
       helmUrl: "",
       namespace: ""
     };
 
     if (flags.region !== undefined && this.isValidRegion(flags.region)) {
       addon["region"] = flags.region;
+    }
+
+    if (flags.marketplaceId !== undefined && this.isAwsAccount(flags.marketplaceId)) {
+      addon["accId"] = flags.marketplaceId;
     }
 
     if (flags.namespace !== undefined && this.isValidNamespace(flags.namespace)) {
@@ -179,8 +183,10 @@ export default class Configure extends SleekCommand {
         this.configuration[getAddonKey(flags.addonName, flags.addonVersion)] = { ...addon, validated: false };
 
         this.updateConfig();
+        this.log(`Configured ${flags.addonName}@${flags.addonVersion}`)
       }
     }
+    this.logToStderr(`Error configuring ${flags.addonName}${flags?.addonVersion?'@'+flags.addonVersion:''}`)
   }
 
   private isValidRegion(region: string): boolean {
@@ -190,6 +196,13 @@ export default class Configure extends SleekCommand {
     // - Be between 3-25 chars
 
     const regionRegex = /^[a-z][a-z0-9-]{1,23}[a-z0-9]$/;
+
+    return regionRegex.test(region);
+  }
+
+  private isAwsAccount(region: string): boolean {
+    // AWS account ID string requires exactly 12 digits
+    const regionRegex = /^\d{12}$/;
 
     return regionRegex.test(region);
   }
@@ -213,8 +226,7 @@ export default class Configure extends SleekCommand {
 
   private isValidUrl(input: string): boolean {
     try {
-      new URL(input);
-      return URL.canParse(input);
+      return !!new URL(input);
     } catch (_) {
       return false;
     }
